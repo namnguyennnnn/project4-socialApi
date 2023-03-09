@@ -58,7 +58,7 @@ namespace DoAn4.Controllers
             var emailBody = $"<p>This is your verify code: </p> <h2>{token}</h2>";
             await _emailService.SendEmailAsync(newUser.Email, "Email Verification", emailBody);
 
-            return Ok(/*"Register success , check your mail to verify"*/ newUser);
+            return Ok("Register success , check your mail to verify");
         }
 
         [HttpPost("verify-email")]
