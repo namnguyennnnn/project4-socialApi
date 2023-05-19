@@ -6,8 +6,6 @@ using Mailjet.Client.TransactionalEmails;
 
 namespace DoAn4.Services.EmailService
 {
- 
-
     public class EmailService : IEmailService
     {
         private readonly EmailSettings _emailSettings;

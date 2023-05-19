@@ -49,3 +49,5 @@ D:\hoctap\DoAn4\DoAn4\obj\Debug\net6.0\DoAn4.genruntimeconfig.cache
 D:\hoctap\DoAn4\DoAn4\obj\Debug\net6.0\ref\DoAn4.dll
 D:\hoctap\DoAn4\DoAn4\bin\Debug\net6.0\Mailjet.Client.dll
 D:\hoctap\DoAn4\DoAn4\bin\Debug\net6.0\Newtonsoft.Json.dll
+D:\hoctap\DoAn4\DoAn4\bin\Debug\net6.0\AutoMapper.dll
+D:\hoctap\DoAn4\DoAn4\bin\Debug\net6.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll

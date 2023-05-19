@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace DoAn4.Models
 {
     public class User
@@ -22,7 +24,7 @@ namespace DoAn4.Models
 
         public string? CoverPhoto { get; set; }
 
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
 
         public string Address { get; set; } = null!;
 
@@ -34,6 +36,12 @@ namespace DoAn4.Models
 
         public string? VerifiedToken { get; set; }
 
+
+        [InverseProperty("CurrenUser")]
+        public ICollection<Friendship>? UserReqest { get; set; }
+
+        [InverseProperty("FriendUser")]
+        public ICollection<Friendship>? UserReply { get; set; }
 
     }
 }

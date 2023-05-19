@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DoAn4.DTOs.UserDTOs
+namespace DoAn4.DTOs.UserDTO
 {
-    public class UserLoginRequest
+    public class UserLoginDTO
     {
         [Required]
         [EmailAddress]

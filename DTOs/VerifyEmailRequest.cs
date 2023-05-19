@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DoAn4.DTOs.EmailDTOs
+namespace DoAn4.DTOs
 {
     public class VerifyEmailRequest
     {

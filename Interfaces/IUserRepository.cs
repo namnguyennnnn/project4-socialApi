@@ -1,4 +1,4 @@
-﻿
+﻿using DoAn4.DTOs.UserDTO;
 using DoAn4.Models;
 
 namespace DoAn4.Interfaces
@@ -9,10 +9,11 @@ namespace DoAn4.Interfaces
 
         Task<User> GetUserByIdAsync(Guid userId);
 
+        Task<List<InfoUserDTO>> GetListUserAsync(List<Guid> UserIds);
+
         Task CreateUserAsync(User user);
 
         Task UpdateUserAsync(User user);
-
 
         Task<int> SaveChangesAsync();
         

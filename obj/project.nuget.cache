@@ -1,13 +1,15 @@
 {
   "version": 2,
-  "dgSpecHash": "vweDSKuZ2ZBO6DHiJkNdfjKhUoCsI6WF5cn32Ze+Vkd9v7KlInAMJoaThJrDroxh59CcBghrHfXQGgPUIAHI0g==",
+  "dgSpecHash": "fz0hc4o248FTWCQ7zZuzGvUHu5YBZ9Eih9/hhOvKlF7vZAJzonAyMiX0FFMJfcjLJ+gEwsSfW6naGsizDzFs3A==",
   "success": true,
   "projectFilePath": "D:\\hoctap\\DoAn4\\DoAn4\\DoAn4.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\nam\\.nuget\\packages\\automapper\\12.0.0\\automapper.12.0.0.nupkg.sha512",
+    "C:\\Users\\nam\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\12.0.0\\automapper.extensions.microsoft.dependencyinjection.12.0.0.nupkg.sha512",
     "C:\\Users\\nam\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\nam\\.nuget\\packages\\mailjet.api\\3.0.0\\mailjet.api.3.0.0.nupkg.sha512",
     "C:\\Users\\nam\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\6.0.10\\microsoft.aspnetcore.authentication.jwtbearer.6.0.10.nupkg.sha512",
-    "C:\\Users\\nam\\.nuget\\packages\\microsoft.csharp\\4.5.0\\microsoft.csharp.4.5.0.nupkg.sha512",
+    "C:\\Users\\nam\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
     "C:\\Users\\nam\\.nuget\\packages\\microsoft.entityframeworkcore\\6.0.10\\microsoft.entityframeworkcore.6.0.10.nupkg.sha512",
     "C:\\Users\\nam\\.nuget\\packages\\microsoft.entityframeworkcore.abstractions\\6.0.10\\microsoft.entityframeworkcore.abstractions.6.0.10.nupkg.sha512",
     "C:\\Users\\nam\\.nuget\\packages\\microsoft.entityframeworkcore.analyzers\\6.0.10\\microsoft.entityframeworkcore.analyzers.6.0.10.nupkg.sha512",
