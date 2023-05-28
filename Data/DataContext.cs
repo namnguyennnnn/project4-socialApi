@@ -22,5 +22,8 @@ namespace DoAn4.Data
         public DbSet<Like> Likes { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<Video> Videos { get; set; }
+        public DbSet<UserOTP> UserOTPs { get; set; }
+        public DbSet<Conversations> Conversations { get; set; }
+        public DbSet<Message> Messages { get; set; }
     }
 }

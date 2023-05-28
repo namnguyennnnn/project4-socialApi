@@ -16,13 +16,19 @@ using DoAn4.Services.FileService;
 using Microsoft.OpenApi.Models;
 using DoAn4.Services.UserService;
 using DoAn4.Services.LikeService;
+using DoAn4.Services.UserOTPService;
+using DoAn4.Services.CommentService;
+
+using DoAn4.Hubs;
+using DoAn4.Services.MessageService;
+using DoAn4.Services.ConversationService;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Swagger config
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(opt =>
 {
@@ -52,15 +58,20 @@ builder.Services.AddSwaggerGen(opt =>
         }
     });
 });
-
+// SignalR
+builder.Services.AddSignalR();
+// Cors config
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", builder =>
-    {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
-    });
+    options.AddPolicy("AllowAll",
+                          policy =>
+                          {
+                              policy.WithOrigins("http://localhost:3000",
+                                                  "https://localhost:7194")
+                                                  .AllowAnyHeader()
+                                                  .AllowAnyMethod()
+                                                  .AllowCredentials();
+                          });
 });
 
 builder.Services.AddDbContext<DataContext>(options =>
@@ -72,13 +83,13 @@ builder.Services.AddDbContext<DataContext>(options =>
 // Dependency injection
 builder.Services.AddScoped<IUserRepository,UserRepository>();
 builder.Services.AddTransient<IUserService, UserService>();
+
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IAccessTokenRepository, AccessTokenRepository>();
 
 builder.Services.AddScoped<IEmailService, EmailService>();
-
 
 builder.Services.AddScoped<IFriendshipRepository, FriendshipRepository>();
 builder.Services.AddScoped<IFriendshipService, FriendshipService>();
@@ -100,12 +111,24 @@ builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ILikeRepository, LikeRepository>();
 builder.Services.AddScoped<ILikeService, LikeService>();
 
+builder.Services.AddScoped<IUserOTPRepository, UserOTPRepository>();
+builder.Services.AddScoped<IUserOTPService, UserOTPService>();
+
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<IMessageService, MessageService>();
+
+builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
+builder.Services.AddScoped<IConversationService, ConversationService>();
+
 builder.Services.AddTransient<IFileService, FileService>();
 
 //EmailSettings
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection(nameof(EmailSettings)));
 
-// Authentication
+// JWT 
 builder.Services.AddAuthentication(options => {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -140,6 +163,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.MapHub<ChatHub>("/chatHub");
 
 app.UseAuthentication();
 

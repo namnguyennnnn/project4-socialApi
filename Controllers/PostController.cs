@@ -51,7 +51,7 @@ namespace DoAn4.Controllers
             try
             {
                 var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                var post = await _postService.DletePostAsync(token, postId);
+                var post = await _postService.DeletePostAsync(token, postId);
                 return Ok("Đã chuyển bài đăng vào thùng rác");
             }
             catch (Exception ex)
@@ -65,6 +65,18 @@ namespace DoAn4.Controllers
         {
             var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var result = await _postService.GetFriendPostsAsync(token, skip, take);
+            if (result != null)
+            {
+                return Ok(result);
+            }
+            return BadRequest();
+        }
+
+        [HttpGet("get-self-post"), Authorize]
+        public async Task<ActionResult<IEnumerable<InFoPostDto>>> GetSelfPost()
+        {
+            var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var result = await _postService.GetSelfPostsAsync(token);
             if (result != null)
             {
                 return Ok(result);

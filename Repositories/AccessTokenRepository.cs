@@ -1,6 +1,5 @@
 ﻿using DoAn4.Data;
 using DoAn4.Interfaces;
-using DoAn4.Migrations;
 using DoAn4.Models;
 using Microsoft.EntityFrameworkCore;
 

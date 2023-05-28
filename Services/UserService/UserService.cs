@@ -1,11 +1,10 @@
 ﻿
-using DoAn4.Models;
 using DoAn4.Interfaces;
 using DoAn4.Services.PostService;
 using Microsoft.EntityFrameworkCore;
 using DoAn4.Services.AuthenticationService;
 using DoAn4.DTOs.UserDTO;
-using Microsoft.AspNetCore.Mvc;
+
 using System.Globalization;
 
 namespace DoAn4.Services.UserService

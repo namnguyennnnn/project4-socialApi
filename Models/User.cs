@@ -32,10 +32,7 @@ namespace DoAn4.Models
 
         public DateTime CreateAt { get; set; }
 
-        public bool IsEmailVerified { get; set; }
-
-        public string? VerifiedToken { get; set; }
-
+        public bool IsEmailVerified { get; set; }    
 
         [InverseProperty("CurrenUser")]
         public ICollection<Friendship>? UserReqest { get; set; }

@@ -10,8 +10,8 @@ namespace DoAn4.Services.PostService
         Task<List<InFoPostDto>> GetFriendPostsAsync(string token, int skip, int take);
         Task<Post> CreatePostAsync(string token, PostDto? postDto =null);
         Task<bool> UpdatePostAsync(string token,Guid postId,UpdatePostDto? filedto=null);
-        Task<bool> DletePostAsync(string token, Guid posdId);
-
+        Task<bool> DeletePostAsync(string token, Guid posdId);
+        Task<List<Post>> GetSelfPostsAsync(string token);
         Task<string> UpdateAvatarAsync(string token, IFormFile ImageFile);
 
     }

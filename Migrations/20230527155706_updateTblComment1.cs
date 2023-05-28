@@ -4,23 +4,23 @@
 
 namespace DoAn4.Migrations
 {
-    public partial class updatetblLike : Migration
+    public partial class updateTblComment1 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "isReact",
-                table: "Likes");
+                name: "IsDelete",
+                table: "Comments");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "isReact",
-                table: "Likes",
-                type: "tinyint(1)",
+            migrationBuilder.AddColumn<int>(
+                name: "IsDelete",
+                table: "Comments",
+                type: "int",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: 0);
         }
     }
 }

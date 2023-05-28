@@ -12,7 +12,7 @@ namespace DoAn4.Models
         public string Content { get; set; }
         public DateTime CommentTime { get; set;}
         public DateTime UpdateCommentTime { get; set; }
-        public int IsDelete { get; set; }
+       
 
         [ForeignKey(nameof(UserId))]
         public User User { get; set; }

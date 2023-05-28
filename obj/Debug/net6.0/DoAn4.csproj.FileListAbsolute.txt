@@ -51,3 +51,4 @@ D:\hoctap\DoAn4\DoAn4\bin\Debug\net6.0\Mailjet.Client.dll
 D:\hoctap\DoAn4\DoAn4\bin\Debug\net6.0\Newtonsoft.Json.dll
 D:\hoctap\DoAn4\DoAn4\bin\Debug\net6.0\AutoMapper.dll
 D:\hoctap\DoAn4\DoAn4\bin\Debug\net6.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
+D:\hoctap\DoAn4\DoAn4\bin\Debug\net6.0\System.Net.WebSockets.WebSocketProtocol.dll

@@ -55,9 +55,6 @@ namespace DoAn4.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("IsDelete")
-                        .HasColumnType("int");
-
                     b.Property<Guid>("PostId")
                         .HasColumnType("char(36)");
 
@@ -74,6 +71,27 @@ namespace DoAn4.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("DoAn4.Models.Conversations", b =>
+                {
+                    b.Property<Guid>("ConversationsId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("UserId1")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("UserId2")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("ConversationsId");
+
+                    b.HasIndex("UserId1");
+
+                    b.HasIndex("UserId2");
+
+                    b.ToTable("Conversations");
                 });
 
             modelBuilder.Entity("DoAn4.Models.Friendship", b =>
@@ -144,6 +162,39 @@ namespace DoAn4.Migrations
                     b.ToTable("Likes");
                 });
 
+            modelBuilder.Entity("DoAn4.Models.Message", b =>
+                {
+                    b.Property<Guid>("MessageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("ConversationsId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("RecipientId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("MessageId");
+
+                    b.HasIndex("ConversationsId");
+
+                    b.HasIndex("RecipientId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Messages");
+                });
+
             modelBuilder.Entity("DoAn4.Models.Notify", b =>
                 {
                     b.Property<Guid>("NotifyId")
@@ -191,6 +242,9 @@ namespace DoAn4.Migrations
 
                     b.Property<DateTime>("PostTime")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<int>("TotalComment")
+                        .HasColumnType("int");
 
                     b.Property<int>("TotalReact")
                         .HasColumnType("int");
@@ -283,12 +337,28 @@ namespace DoAn4.Migrations
                         .IsRequired()
                         .HasColumnType("longblob");
 
-                    b.Property<string>("VerifiedToken")
-                        .HasColumnType("longtext");
-
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("DoAn4.Models.UserOTP", b =>
+                {
+                    b.Property<Guid>("UserOtpID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("UserOtpID");
+
+                    b.ToTable("UserOTPs");
                 });
 
             modelBuilder.Entity("DoAn4.Models.Video", b =>
@@ -341,6 +411,25 @@ namespace DoAn4.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("DoAn4.Models.Conversations", b =>
+                {
+                    b.HasOne("DoAn4.Models.User", "User1")
+                        .WithMany()
+                        .HasForeignKey("UserId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DoAn4.Models.User", "User2")
+                        .WithMany()
+                        .HasForeignKey("UserId2")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User1");
+
+                    b.Navigation("User2");
+                });
+
             modelBuilder.Entity("DoAn4.Models.Friendship", b =>
                 {
                     b.HasOne("DoAn4.Models.User", "FriendUser")
@@ -390,6 +479,33 @@ namespace DoAn4.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("DoAn4.Models.Message", b =>
+                {
+                    b.HasOne("DoAn4.Models.Conversations", "Conversations")
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DoAn4.Models.User", "UserRep")
+                        .WithMany()
+                        .HasForeignKey("RecipientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DoAn4.Models.User", "UserSend")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Conversations");
+
+                    b.Navigation("UserRep");
+
+                    b.Navigation("UserSend");
+                });
+
             modelBuilder.Entity("DoAn4.Models.Notify", b =>
                 {
                     b.HasOne("DoAn4.Models.Friendship", "FriendShip")
@@ -432,6 +548,11 @@ namespace DoAn4.Migrations
                         .IsRequired();
 
                     b.Navigation("Post");
+                });
+
+            modelBuilder.Entity("DoAn4.Models.Conversations", b =>
+                {
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("DoAn4.Models.Friendship", b =>

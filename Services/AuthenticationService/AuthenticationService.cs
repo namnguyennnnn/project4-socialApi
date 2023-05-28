@@ -10,6 +10,7 @@ using DoAn4.DTOs.UserDTO;
 using System.Security.Authentication;
 using System.Globalization;
 
+
 namespace DoAn4.Services.AuthenticationService
 {
     public class AuthenticationService : IAuthenticationService
@@ -20,15 +21,15 @@ namespace DoAn4.Services.AuthenticationService
         private readonly IUserRepository _userRepository;
         private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IAccessTokenRepository _accessTokenRepository;
-        
+        private readonly IUserOTPRepository _userOTPRepository;
 
-        public AuthenticationService( IConfiguration configuration, IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository, IAccessTokenRepository accessTokenRepository)
+        public AuthenticationService(IUserOTPRepository userOTPRepository, IConfiguration configuration, IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository, IAccessTokenRepository accessTokenRepository)
         {
             _configuration = configuration;
             _userRepository = userRepository;
             _refreshTokenRepository = refreshTokenRepository;
             _accessTokenRepository = accessTokenRepository;
-           
+            _userOTPRepository = userOTPRepository;
         }
 
         public async Task<AuthenticationResult> LoginAsync(string email, string password)
@@ -41,15 +42,7 @@ namespace DoAn4.Services.AuthenticationService
                 {
                     Errors = new[] { "Người dùng không tồn tại" }
                 };
-            }
-
-            else if (user.IsEmailVerified == false)
-            {
-                return new AuthenticationResult
-                {
-                    Errors = new[] { "Người dùng chưa xác thực tài khoản " }
-                };
-            }
+            }           
 
             else if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
             {
@@ -59,7 +52,7 @@ namespace DoAn4.Services.AuthenticationService
                 };
 
             }
-
+            
             var accessToken = GenerateAccessToken(user);
 
             var refreshToken = GenerateRefreshToken();
@@ -93,7 +86,11 @@ namespace DoAn4.Services.AuthenticationService
             {
                 Success = true,
                 AccessToken = accessToken,
-                RefreshToken = refreshToken
+                RefreshToken = refreshToken,
+                Avatar = user.Avatar,
+                CoverPhoto = user.CoverPhoto,
+                FullName = user.Fullname,
+                DayOfBirth = user.DateOfBirth
             };
         }
 
@@ -184,15 +181,16 @@ namespace DoAn4.Services.AuthenticationService
             if (existingUser != null)
             {
                 throw new AuthenticationException("Email đã tồn tại");
-            }
+            }           
 
-            else if(request.Password!= request.RePassword)
+            var userOTP = await _userOTPRepository.GetUserOTPByEmail(request.Email);
+            if (userOTP == null || userOTP.Token != request.Token)
             {
-                throw new AuthenticationException("Hai mật khẩu không trùng khớp");
-
+                throw new AuthenticationException("OTP không hợp lệ");
             }
+
             CreatedPasswordHash(request.Password, out byte[] passwordHash, out byte[] salt);
-            var formatCurentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")).ToString("dd-MM-yyyy", CultureInfo.InvariantCulture);
+            var formatCurrentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")).ToString("dd-MM-yyyy", CultureInfo.InvariantCulture);
             var newUser = new User
             {
                 UserId = Guid.NewGuid(),
@@ -205,11 +203,12 @@ namespace DoAn4.Services.AuthenticationService
                 Gender = request.Gender,
                 DateOfBirth = request.DateOfBirth,
                 Address = request.Address,
-                CreateAt = DateTime.ParseExact(formatCurentTime, "dd-MM-yyyy", CultureInfo.InvariantCulture),
-                IsEmailVerified = false
+                CreateAt = DateTime.ParseExact(formatCurrentTime, "dd-MM-yyyy", CultureInfo.InvariantCulture),
+                IsEmailVerified = true
             };
 
             await _userRepository.CreateUserAsync(newUser);
+            await _userOTPRepository.DeleteUserOTP(request.Email);
 
             return true;
         }
@@ -317,7 +316,7 @@ namespace DoAn4.Services.AuthenticationService
             var claims = new List<Claim>{
                 new Claim("id", user.UserId.ToString()),
                 new Claim("Name", user.Fullname),
-                new Claim("Email", user.Email),
+                new Claim("Email", user.Email),              
             };
 
             // Tạo key từ secret

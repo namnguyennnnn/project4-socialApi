@@ -35,6 +35,7 @@ namespace DoAn4.Repositories
                  PostId = p.PostId,
                  Content = p.Content,
                  TotalReact = p.TotalReact,
+                 TotalComment = p.TotalComment,
                  PostTime = p.PostTime,
                  UpdateTime = p.UpdateTime,
                  User = new InfoUserDTO

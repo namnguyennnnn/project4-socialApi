@@ -1,26 +1,21 @@
 ﻿
 using DoAn4.DTOs.PostDTO;
-using DoAn4.DTOs.UserDTO;
 using DoAn4.Interfaces;
 using DoAn4.Models;
 using DoAn4.Services.AuthenticationService;
-
 using DoAn4.Services.ImageService;
 using DoAn4.Services.VideoService;
 
 using Microsoft.EntityFrameworkCore;
 
-using System.Globalization;
 using System.Security.Authentication;
-using static System.Net.Mime.MediaTypeNames;
+
 
 namespace DoAn4.Services.PostService
 {
     public class PostService : IPostService
     {
-        private readonly string formatCurentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))
-                                                    .ToString("dd-MM-yyyy",CultureInfo.InvariantCulture);
-
+       
         private readonly IPostRepository _postRepository;
         private readonly IImageService _imageService;
         private readonly IVideoService _videoService;
@@ -68,13 +63,16 @@ namespace DoAn4.Services.PostService
             {
                 throw new ArgumentException("Không có thông tin bài đăng được cung cấp.");
             }
+            var localTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
             var post = new Post
             {
                 PostId = Guid.NewGuid(),
                 UserPostId = user.UserId,
                 Content = postDto?.Content,
-                PostTime = DateTime.ParseExact(formatCurentTime, "dd-MM-yyyy", CultureInfo.InvariantCulture),
-                UpdateTime = DateTime.ParseExact(formatCurentTime, "dd-MM-yyyy", CultureInfo.InvariantCulture),
+                PostTime = localTime,
+                UpdateTime = localTime,
+                TotalReact = 0,
+                TotalComment = 0,
                 IsDeleted = false
             };
 
@@ -160,7 +158,7 @@ namespace DoAn4.Services.PostService
             return true;
         }
        
-        public async Task<bool> DletePostAsync(string token, Guid posdId)
+        public async Task<bool> DeletePostAsync(string token, Guid posdId)
         {
             var user = await _authenticationService.GetIdUserFromAccessToken(token);
             var isDeletePost = await _postRepository.DeletePostAsync(posdId);
@@ -183,6 +181,9 @@ namespace DoAn4.Services.PostService
         {
             var ext = Path.GetExtension(imageFile.FileName);
             var user = await _authenticationService.GetIdUserFromAccessToken(token);
+            var timeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var utcNow = DateTime.UtcNow;
+            var localTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, timeZone);
             if (user == null)
             {
                 throw new AuthenticationException("Token đã hết hạn");
@@ -201,8 +202,10 @@ namespace DoAn4.Services.PostService
                     PostId = Guid.NewGuid(),
                     UserPostId = user.UserId,
                     Content = "Đã cập nhật 1 ảnh trên profile",
-                    PostTime = DateTime.ParseExact(formatCurentTime, "dd-MM-yyyy", CultureInfo.InvariantCulture),
-                    UpdateTime = DateTime.ParseExact(formatCurentTime, "dd-MM-yyyy", CultureInfo.InvariantCulture),
+                    TotalReact = 0 ,
+                    TotalComment = 0,
+                    PostTime = localTime,
+                    UpdateTime = localTime,
                     IsDeleted = false
                 };
 
@@ -215,6 +218,19 @@ namespace DoAn4.Services.PostService
                 return imgPath;
             }
             
+        }
+
+        public async Task<List<Post>> GetSelfPostsAsync(string token)
+        {
+            var user = await _authenticationService.GetIdUserFromAccessToken(token);
+            if (user == null)
+            {
+                throw new AuthenticationException("Token đã hết hạn");
+            }
+
+            var selfPosts = await _postRepository.GetAllPostByIdUserAsync(user.UserId);
+
+            return selfPosts;
         }
     }
 
