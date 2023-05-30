@@ -87,10 +87,19 @@ namespace DoAn4.Services.AuthenticationService
                 Success = true,
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                Avatar = user.Avatar,
-                CoverPhoto = user.CoverPhoto,
-                FullName = user.Fullname,
-                DayOfBirth = user.DateOfBirth
+                User = new InfoUserDTO
+                {
+                    UserId = user.UserId,
+                    Email = user.Email,
+                    Fullname = user.Fullname,
+                    Avatar = user.Avatar,
+                    Gender =user.Gender,
+                    CoverPhoto =user.CoverPhoto,
+                    DateOfBirth = user.DateOfBirth,                   
+                    Address =user.Address,                   
+                    CreateAt = user.CreateAt
+                }
+
             };
         }
 
@@ -174,7 +183,7 @@ namespace DoAn4.Services.AuthenticationService
             };
         }
 
-        public async Task<bool> RegisterAsync(UserRegisterDTO request)
+        public async Task<ResultRespone> RegisterAsync(UserRegisterDTO request)
         {
             var existingUser = await _userRepository.GetUserByEmailAsync(request.Email);
 
@@ -210,7 +219,7 @@ namespace DoAn4.Services.AuthenticationService
             await _userRepository.CreateUserAsync(newUser);
             await _userOTPRepository.DeleteUserOTP(request.Email);
 
-            return true;
+            return new ResultRespone { Status = 200 };
         }
 
         public async Task<bool> LogoutAsync(string refreshToken, string accessToken)

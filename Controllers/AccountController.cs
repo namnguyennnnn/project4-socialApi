@@ -34,7 +34,7 @@ namespace DoAn4.Controllers
                  return BadRequest(new { errors = result.Errors });
              }
 
-             return Ok(new { accessToken = result.AccessToken, refreshToken = result.RefreshToken, Avatar = result.Avatar, CoverPhoto = result.CoverPhoto,FullName =result.FullName,DayOfBirth =result.DayOfBirth });
+             return Ok(result);
             
         }
 
@@ -46,12 +46,12 @@ namespace DoAn4.Controllers
             {
                 var result = await _authenticationService.RegisterAsync(request);
 
-                if (!result)
+                if (result == null)
                 {
                     return BadRequest();
                 }
 
-                return Ok("Đăng ký thành công");
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -71,7 +71,7 @@ namespace DoAn4.Controllers
                     return BadRequest();
                 }
 
-                return Ok(result);
+                return Ok();
             }
             catch (Exception ex)
             {

@@ -43,6 +43,7 @@ namespace DoAn4.Repositories
                      UserId = p.User.UserId,
                      Email = p.User.Email,
                      Fullname = p.User.Fullname,
+                     Gender = p.User.Gender,
                      Avatar = p.User.Avatar
                  },
                  Images = p.Images.Select(i => Path.Combine(_environment.ContentRootPath, i.ImageLink)).ToList(),

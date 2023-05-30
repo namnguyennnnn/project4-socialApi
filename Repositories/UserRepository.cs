@@ -29,8 +29,13 @@ namespace DoAn4.Repositories
     
         public async Task<User> GetUserByEmailAsync(string email)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-             
+            var user =  await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (user != null && !string.IsNullOrEmpty(user.Avatar))
+            {
+                user.Avatar = Path.Combine(_environment.ContentRootPath, user.Avatar);
+                user.CoverPhoto = Path.Combine(_environment.ContentRootPath, user.CoverPhoto);
+            }
+            return user;
         }
 
         public async Task<User> GetUserByIdAsync(Guid userId)

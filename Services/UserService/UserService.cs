@@ -32,6 +32,7 @@ namespace DoAn4.Services.UserService
             {                
                 Email = user.Email,
                 Fullname = user.Fullname,
+                Gender =user.Gender,
                 Avatar = Path.Combine(_environment.ContentRootPath, user.Avatar),
                 CoverPhoto = Path.Combine(_environment.ContentRootPath, user.CoverPhoto),
                 DateOfBirth = user.DateOfBirth,
@@ -67,6 +68,7 @@ namespace DoAn4.Services.UserService
                 {
                     Email = user.Email,
                     Fullname = user.Fullname,
+                    Gender = user.Gender,
                     Avatar = user.Avatar,
                     CoverPhoto = user.CoverPhoto,
                     DateOfBirth = user.DateOfBirth,
@@ -106,6 +108,7 @@ namespace DoAn4.Services.UserService
                 {
                     Email = user.Email,
                     Fullname = user.Fullname,
+                    Gender = user.Gender,
                     Avatar = user.Avatar,
                     CoverPhoto = user.CoverPhoto,
                     DateOfBirth = user.DateOfBirth,
@@ -154,6 +157,7 @@ namespace DoAn4.Services.UserService
                 {
                     Email = user.Email,
                     Fullname = user.Fullname,
+                    Gender = user.Gender,
                     Avatar = user.Avatar,
                     CoverPhoto = user.CoverPhoto,
                     DateOfBirth = user.DateOfBirth,

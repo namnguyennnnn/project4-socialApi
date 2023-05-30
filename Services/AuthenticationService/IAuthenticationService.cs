@@ -11,7 +11,7 @@ namespace DoAn4.Services.AuthenticationService
 
         Task<bool> LogoutAsync(string refreshToken, string accessToken);
 
-        Task<bool> RegisterAsync(UserRegisterDTO request);
+        Task<ResultRespone> RegisterAsync(UserRegisterDTO request);
 
         Task<ReadIdUserFromToken> GetIdUserFromAccessToken(string token);
     }

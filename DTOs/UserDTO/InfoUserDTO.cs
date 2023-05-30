@@ -11,6 +11,8 @@ namespace DoAn4.DTOs.UserDTO
         [MaxLength(100)]
         public string Fullname { get; set; } = null!;
 
+        public int Gender { get; set; }
+
         public string? Avatar { get; set; }
 
         public string? CoverPhoto { get; set; }
