@@ -1,24 +1,26 @@
-﻿using DoAn4.Interfaces;
+﻿using DoAn4.DTOs;
+using DoAn4.Interfaces;
 using DoAn4.Models;
-using System.Globalization;
+using DoAn4.Services.AuthenticationService;
+using Microsoft.EntityFrameworkCore;
 
 namespace DoAn4.Services.NotificationService
 {
     public class NotificationService : INotificationService
     {
-        private readonly string formatCurentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))
-                                                    .ToString("dd-MM-yyyy", CultureInfo.InvariantCulture);
+       
 
         private readonly INotifyRepository _notifyRepository;
         private readonly IUserRepository _userRepository;
         private readonly IFriendshipRepository _friendshipRepository;
-       
+        private readonly IAuthenticationService _authenticationService;
 
-        public NotificationService( INotifyRepository notifyRepository, IUserRepository userRepository ,IFriendshipRepository friendshipRepository)
+        public NotificationService(IAuthenticationService authenticationService, INotifyRepository notifyRepository, IUserRepository userRepository ,IFriendshipRepository friendshipRepository)
         {
             _notifyRepository = notifyRepository;
             _userRepository = userRepository;
             _friendshipRepository = friendshipRepository;  
+            _authenticationService = authenticationService;
         }
 
        
@@ -27,34 +29,75 @@ namespace DoAn4.Services.NotificationService
         {
             var senderInfo = await _userRepository.GetUserByIdAsync(sender);
             var idfriendship = await _friendshipRepository.GetFriendshipByUserIdAndFriendUserId(senderInfo.UserId, receiver);
+            var localTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
             var notification = new Notify
             {
                 NotifyId  = Guid.NewGuid(),
                 NotifyContent = $"{senderInfo.Fullname} đã gửi cho bạn một lời mời kết bạn",
-                NotifyTime = DateTime.ParseExact(formatCurentTime, "dd-MM-yyyy", CultureInfo.InvariantCulture),
+                NotifyTime = localTime,
                 NotifyType = "friend_request",
                 IsRead = false,
-                FriendShipId = idfriendship.FriendshipId
+                FriendShipId = idfriendship.FriendshipId, 
+                PostId = Guid.Empty,
+                UserId = receiver
             };
 
             await _notifyRepository.CreateNotifyAsync(notification);
         }
 
-        public async Task AcceptFriendRequestNotification(Guid receiver, Guid sender)
+        public async Task AcceptFriendRequestNotification(Guid curUser,Guid friendShipId)
         {
-            var senderInfo = await _userRepository.GetUserByIdAsync(receiver);
-            var idfriendship = await _friendshipRepository.GetFriendshipByUserIdAndFriendUserId(receiver, sender);
+            var receiverInfo = await _userRepository.GetUserByIdAsync(curUser);         
+            var friendShip = await _friendshipRepository.GetFriendshipById(friendShipId);
+            var sender = friendShip.FriendUserId == curUser ? friendShip.UserId : friendShip.FriendUserId;
+            var localTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
             var notification = new Notify
             {
                 NotifyId = Guid.NewGuid(),
-                NotifyContent = $"{senderInfo.Fullname} đã chấp nhận lời mời kết bạn",
-                NotifyTime = DateTime.ParseExact(formatCurentTime, "dd-MM-yyyy", CultureInfo.InvariantCulture),
+                NotifyContent = $"{receiverInfo.Fullname} đã chấp nhận lời mời kết bạn",
+                NotifyTime = localTime,
                 NotifyType = "acp_friend_request",
                 IsRead = false,
-                FriendShipId = idfriendship.FriendshipId
+                FriendShipId = friendShipId,
+                PostId = Guid.Empty,
+                UserId = sender,
             };
             await _notifyRepository.CreateNotifyAsync(notification);
         }
 
+        public async Task NotifyCommentPost(Guid postId, Guid commentatorId , Guid receiverNotify)
+        {
+            var commentator = await _userRepository.GetUserByIdAsync(commentatorId);
+            var localTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
+            var notification = new Notify
+            {
+                NotifyId = Guid.NewGuid(),
+                NotifyContent = $"{commentator.Fullname} đã bình luận về bài viết của bạn",
+                NotifyTime = localTime,
+                NotifyType = "comment_post",
+                IsRead = false,
+                FriendShipId = Guid.Empty,
+                PostId = postId,
+                UserId = receiverNotify,
+            };
+            try
+            {
+                await _notifyRepository.CreateNotifyAsync(notification);                
+            }
+            catch (DbUpdateException e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        public async Task<List<Notify>> GetAllNotifies(string token)
+        {
+            var user = await _authenticationService.GetIdUserFromAccessToken(token);
+            if(user == null)
+            {
+                throw new Exception("Token hết hạn");
+            }
+            return await _notifyRepository.GetAllNotifyByIdUser(user.UserId);
+        }
     }
 }

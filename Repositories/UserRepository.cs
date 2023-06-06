@@ -12,13 +12,13 @@ namespace DoAn4.Repositories
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        private readonly IWebHostEnvironment _environment;
+       
 
-        public UserRepository(IWebHostEnvironment env,DataContext context, IMapper mapper) 
+        public UserRepository(DataContext context, IMapper mapper) 
         {
             _context = context;
             _mapper = mapper;
-            _environment = env;
+            
         }
 
         public async Task CreateUserAsync(User user)
@@ -29,23 +29,14 @@ namespace DoAn4.Repositories
     
         public async Task<User> GetUserByEmailAsync(string email)
         {
-            var user =  await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-            if (user != null && !string.IsNullOrEmpty(user.Avatar))
-            {
-                user.Avatar = Path.Combine(_environment.ContentRootPath, user.Avatar);
-                user.CoverPhoto = Path.Combine(_environment.ContentRootPath, user.CoverPhoto);
-            }
+            var user =  await _context.Users.FirstOrDefaultAsync(u => u.Email == email);          
             return user;
         }
 
         public async Task<User> GetUserByIdAsync(Guid userId)
         {
             var user = await _context.Users.FindAsync(userId);
-            if (user != null && !string.IsNullOrEmpty(user.Avatar))
-            {
-                user.Avatar = Path.Combine(_environment.ContentRootPath, user.Avatar);
-                user.CoverPhoto = Path.Combine(_environment.ContentRootPath, user.CoverPhoto);
-            }
+           
             return user;
         }
 
@@ -53,8 +44,7 @@ namespace DoAn4.Repositories
         public async Task<List<InfoUserDTO>> GetListUserAsync(List<Guid> UserIds)
         {
             var users = await _context.Users.Where(u => UserIds.Contains(u.UserId)).ToListAsync();
-            var result = _mapper.Map<List<InfoUserDTO>>(users);
-            result.ForEach(u => u.Avatar = Path.Combine(_environment.ContentRootPath, u.Avatar));
+            var result = _mapper.Map<List<InfoUserDTO>>(users);           
             return result;
         }
         
@@ -71,6 +61,20 @@ namespace DoAn4.Repositories
             return await _context.SaveChangesAsync();
         }
 
-       
+        public async Task<List<InfoUserDTO>> GetUsersByKeyWord(string keyword)
+        {
+            var users = await _context.Users
+            .Where(u => EF.Functions.Like(u.Fullname, $"%{keyword}%") || EF.Functions.Like(u.Email, $"%{keyword}%"))
+            .ToListAsync();
+
+            if (users.Count == 0)
+            {
+                users = await _context.Users
+                    .Where(u => u.Fullname.Contains(keyword) || u.Email.Contains(keyword))
+                    .ToListAsync();
+            }
+            var result = _mapper.Map<List<InfoUserDTO>>(users);
+            return result;
+        }
     }
 }

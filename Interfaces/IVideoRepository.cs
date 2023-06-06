@@ -9,9 +9,9 @@ namespace DoAn4.Interfaces
 
         Task CreateVideoAsync(Video video);
 
-        Task<Video> GetVideoByIdAsync(Guid videoId);
+        Task<Video> GetVideoByLinkAsync(string videoLink);
 
-        Task RemoveVideoAsync(Guid videoId);
+        Task RemoveVideoAsync(string videoLink);
 
         Task<int> SaveChangeAsync();
     }

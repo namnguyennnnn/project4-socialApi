@@ -14,13 +14,15 @@ namespace DoAn4.Models
         public string NotifyType { get; set; }
 
         public bool IsRead  { get; set; }
-
+ 
         public Guid PostId { get; set; }
-
+   
         public Guid FriendShipId { get; set; }
 
-        [ForeignKey("FriendShipId")]
-        public Friendship FriendShip { get; set; }
+        [ForeignKey("User")]
+        public Guid UserId { get; set; }
+   
+        
 
     }
 }

@@ -24,6 +24,7 @@ namespace DoAn4.Models
         public DateTime UpdateTime { get; set; }
 
         public bool IsDeleted { get; set; }
+     
 
         [ForeignKey(nameof(UserPostId))]
         public User User { get; set; }

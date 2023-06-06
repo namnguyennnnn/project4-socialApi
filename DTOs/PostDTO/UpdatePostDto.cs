@@ -4,9 +4,9 @@
     {
         
         public string? Content { get; set; }=null;
-        public List<Guid>? IdImagesRemove { get; set; } = null;
-        public List<Guid>? IdVideosRemove { get; set; } = null;
-        public List<IFormFile>? NewImages { get; set; } = null;
-        public List<IFormFile>? Newvideos { get; set; } = null;
+        public List<string>? ImagesLinkRemove { get; set; } = null;
+        public List<string>? VideosLinkRemove { get; set; } = null;
+        public List<IFormFile>? ImageFiles { get; set; } = null;
+        public List<IFormFile>? VideoFiles { get; set; } = null;
     }
 }

@@ -1,8 +1,8 @@
 ﻿
 using Microsoft.Extensions.Options;
-using DoAn4.Data;
 using Mailjet.Client;
 using Mailjet.Client.TransactionalEmails;
+using DoAn4.Helper;
 
 namespace DoAn4.Services.EmailService
 {

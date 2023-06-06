@@ -13,14 +13,14 @@ namespace DoAn4.Services.UserService
     {
         private readonly IUserRepository _userRepository;
         private readonly IPostService _postService;
-        private readonly IWebHostEnvironment _environment;
+        
         private readonly IAuthenticationService _authenticationService;
 
-        public UserService(IAuthenticationService authenticationService, IWebHostEnvironment env, IUserRepository userRepository, IPostService postService)
+        public UserService(IAuthenticationService authenticationService,  IUserRepository userRepository, IPostService postService)
         {
             _userRepository = userRepository;
             _postService = postService;
-            _environment = env;
+            
             _authenticationService = authenticationService;
         }
 
@@ -29,12 +29,13 @@ namespace DoAn4.Services.UserService
             var curUser = await _authenticationService.GetIdUserFromAccessToken(token);
             var user = await _userRepository.GetUserByIdAsync(curUser.UserId);
             var newUserDto = new InfoUserDTO
-            {                
+            {      
+                UserId = user.UserId,
                 Email = user.Email,
                 Fullname = user.Fullname,
                 Gender =user.Gender,
-                Avatar = Path.Combine(_environment.ContentRootPath, user.Avatar),
-                CoverPhoto = Path.Combine(_environment.ContentRootPath, user.CoverPhoto),
+                Avatar = user.Avatar,
+                CoverPhoto = user.CoverPhoto,
                 DateOfBirth = user.DateOfBirth,
                 Address = user.Address,
                 Bio = user.Bio,
@@ -55,11 +56,7 @@ namespace DoAn4.Services.UserService
             else if (user == null)
             {
                 throw new ArgumentNullException(nameof(user));
-            }
-            var imgPathWithRoot = Path.Combine(_environment.ContentRootPath, imgPath);
-            
-            user.Avatar = imgPathWithRoot;
-            
+            }                       
             
             try
             {
@@ -69,7 +66,7 @@ namespace DoAn4.Services.UserService
                     Email = user.Email,
                     Fullname = user.Fullname,
                     Gender = user.Gender,
-                    Avatar = user.Avatar,
+                    Avatar = imgPath,
                     CoverPhoto = user.CoverPhoto,
                     DateOfBirth = user.DateOfBirth,
                     Address = user.Address,
@@ -97,10 +94,7 @@ namespace DoAn4.Services.UserService
             {
                 throw new ArgumentNullException(nameof(user));
             }
-            var imgPathWithRoot = Path.Combine(_environment.ContentRootPath, imgPath);
-
-            user.CoverPhoto = imgPathWithRoot;
-
+            
             try
             {
                 await _userRepository.UpdateUserAsync(user);
@@ -109,7 +103,7 @@ namespace DoAn4.Services.UserService
                     Email = user.Email,
                     Fullname = user.Fullname,
                     Gender = user.Gender,
-                    Avatar = user.Avatar,
+                    Avatar = imgPath,
                     CoverPhoto = user.CoverPhoto,
                     DateOfBirth = user.DateOfBirth,
                     Address = user.Address,

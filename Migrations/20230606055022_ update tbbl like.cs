@@ -4,7 +4,7 @@
 
 namespace DoAn4.Migrations
 {
-    public partial class updatetbl : Migration
+    public partial class updatetbbllike : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

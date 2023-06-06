@@ -118,6 +118,18 @@ namespace DoAn4.Controllers
             return Ok(new { access_token = result.AccessToken, refresh_token = result.RefreshToken });
 
         }
-        
+
+        [HttpGet,Authorize]
+        public async Task<IActionResult> getinfo()
+        {
+            var accessToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var result = await _authenticationService.GetIdUserFromAccessToken(accessToken);
+
+           
+
+            return Ok(result);
+
+        }
+
     }
 }

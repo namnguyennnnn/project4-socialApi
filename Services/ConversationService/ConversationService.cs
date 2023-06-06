@@ -1,4 +1,5 @@
 ﻿using DoAn4.DTOs;
+using DoAn4.DTOs.AuthenticationDTOs;
 using DoAn4.Interfaces;
 using DoAn4.Repositories;
 using DoAn4.Services.AuthenticationService;
@@ -21,21 +22,21 @@ namespace DoAn4.Services.ConversationService
             _userRepository = userRepository;  
         }
 
-        public async Task<bool> DeleteConversation(Guid conversationId)
+        public async Task<ResultRespone> DeleteConversation(Guid conversationId)
         {
             var conversation = await _conversationRepository.GetConversationById(conversationId);
 
             if (conversation == null)
             {
                
-                return false;
+                return new ResultRespone { Status = 400};
             }
          
             await _messageRepository.DeleteMessagesByConversationId(conversationId);
            
             await _conversationRepository.DeleteConversation(conversation);
 
-            return true;
+            return new ResultRespone { Status = 200 };
         }
 
         public async Task<List<ConversationDto>> GetAllConversations(string token)

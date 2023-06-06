@@ -21,16 +21,15 @@ namespace DoAn4.Services.ImageService
         public async Task<bool> RemoveImage(Guid postId, UpdatePostDto updatePostDto)
         {
             var removedImageLinks = new List<string>();
-            foreach (var removedImageId in updatePostDto.IdImagesRemove)
+            foreach (var removedImageLink in updatePostDto.ImagesLinkRemove)
             {
-                var removedImage = await _imageRepository.GetImageByIdAsync(removedImageId);
+                var removedImage = await _imageRepository.GetImageByLinkAsync(removedImageLink);
                 if (removedImage != null && removedImage.PostId == postId)
                 {
                     removedImageLinks.Add(removedImage.ImageLink);
-                    await _imageRepository.RemoveImageAsync(removedImageId);
+                    await _imageRepository.RemoveImageAsync(removedImageLink);
                 }
-            }
-            // Remove the images from storage
+            }           
             var isRemove = await _fileService.DeleteFiles(removedImageLinks);
             return isRemove;
         }

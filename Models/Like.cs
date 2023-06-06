@@ -12,6 +12,7 @@ namespace DoAn4.Models
 
         public Guid UserId { get; set; }
 
+        [MaxLength (1)]
         public int React { get; set; }    
 
         [ForeignKey(nameof(PostId))]        

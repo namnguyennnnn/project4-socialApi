@@ -2,7 +2,7 @@
 using DoAn4.Data;
 using DoAn4.Interfaces;
 using DoAn4.Models;
-
+using Microsoft.EntityFrameworkCore;
 
 
 namespace DoAn4.Repositories
@@ -22,9 +22,9 @@ namespace DoAn4.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Images> GetImageByIdAsync(Guid imageId)
+        public async Task<Images> GetImageByLinkAsync(string imageLink)
         {
-            var image = await _context.Images.FindAsync(imageId);
+            var image = await _context.Images.SingleOrDefaultAsync(img => img.ImageLink == imageLink, CancellationToken.None);
             return image;
         }
 
@@ -40,9 +40,9 @@ namespace DoAn4.Repositories
             return removedImages;   
         }
 
-        public async Task RemoveImageAsync(Guid imageId)
+        public async Task RemoveImageAsync(string imageLink)
         {
-            var image = await _context.Images.FindAsync(imageId);
+            var image = await _context.Images.SingleOrDefaultAsync(img => img.ImageLink == imageLink);
 
             if (image != null)
             {

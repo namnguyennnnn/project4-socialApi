@@ -7,13 +7,13 @@ namespace DoAn4.Interfaces
     {
         Task<Images> GetImageByIdPostAsync(Guid postId);
 
-        Task<Images> GetImageByIdAsync(Guid imageId);
+        Task<Images> GetImageByLinkAsync(string imageLink);
 
         Task CreateImageAsync(Images images);
 
         Task<List<Images>> GetRemovedImagesFromPost(Post post, List<string>? Images);
 
-        Task RemoveImageAsync(Guid imageId);
+        Task RemoveImageAsync(string imageLink);
 
         Task<int> SaveChangeAsync();
     }

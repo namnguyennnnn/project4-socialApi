@@ -38,7 +38,7 @@ namespace DoAn4.Repositories
              await _context.SaveChangesAsync(); 
         }
 
-        public async Task<bool> IsFriendship(Guid userId, Guid friendUserId)
+        public async Task<bool> IsFriendshipExist(Guid userId, Guid friendUserId)
         {
             var friendship = await _context.Friendships
             .FirstOrDefaultAsync(f => (f.UserId == userId && f.FriendUserId == friendUserId)
@@ -46,6 +46,12 @@ namespace DoAn4.Repositories
 
             return friendship != null && friendship.FriendStatus == 1;
 
+        }
+        public async Task<bool> IsFriendship(Guid friendShipId)
+        {
+            var friendship = await _context.Friendships
+            .FirstOrDefaultAsync(f => (f.FriendshipId == friendShipId));
+            return friendship != null && friendship.FriendStatus == 1;
         }
 
         public async Task<bool> IsFriendshipRequestExit(Guid userId, Guid friendUserId)

@@ -1,9 +1,10 @@
 ﻿using DoAn4.DTOs;
+using DoAn4.DTOs.AuthenticationDTOs;
 using DoAn4.Interfaces;
 using DoAn4.Models;
 
 using DoAn4.Services.AuthenticationService;
-
+using DoAn4.Services.NotificationService;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -17,13 +18,16 @@ namespace DoAn4.Services.CommentService
         private readonly IAuthenticationService _authenticationService;
         private readonly IPostRepository _postRepository;
         private readonly IUserRepository _userRepository;
+        private readonly INotificationService _notificationService;
 
-        public CommentService(IUserRepository userRepository, IPostRepository postRepository, ICommentRepository commentRepository, IAuthenticationService authenticationService)
+
+        public CommentService(INotificationService notificationService, IUserRepository userRepository, IPostRepository postRepository, ICommentRepository commentRepository, IAuthenticationService authenticationService)
         {
             _commentRepository = commentRepository;
             _authenticationService = authenticationService;
             _postRepository = postRepository;
             _userRepository = userRepository;
+            _notificationService = notificationService;
         }
 
         public async Task<List<CommentDto>> GetAllCommentAsync(Guid postId)
@@ -78,6 +82,8 @@ namespace DoAn4.Services.CommentService
 
                 await _postRepository.UpdatePostAsync(post);
 
+                await _notificationService.NotifyCommentPost(postId , user.UserId,post.UserPostId);
+
                 return newComment;
             }
             catch (DbUpdateException ex)
@@ -86,7 +92,7 @@ namespace DoAn4.Services.CommentService
             }
            
         }
-        public async Task<bool> UpdateCommentAsync(string token, Guid commentId, string content)
+        public async Task<ResultRespone> UpdateCommentAsync(string token, Guid commentId, string content)
         {
             var user = await _authenticationService.GetIdUserFromAccessToken(token);
             var comment = await _commentRepository.GetCommentById(commentId);
@@ -109,7 +115,7 @@ namespace DoAn4.Services.CommentService
             try
             {
                 await _commentRepository.UpdateComment(comment);
-                return true;
+                return new ResultRespone { Status =  200};
             }
             catch (DbUpdateException ex)
             {
@@ -118,7 +124,7 @@ namespace DoAn4.Services.CommentService
 
         }
 
-        public async Task<bool> DeleteCommentAsync(string token,Guid postId,Guid commentId)
+        public async Task<ResultRespone> DeleteCommentAsync(string token,Guid postId,Guid commentId)
         {
             var user = await _authenticationService.GetIdUserFromAccessToken(token);
             var post = await _postRepository.GetPostByIdAsync(postId);
@@ -135,11 +141,11 @@ namespace DoAn4.Services.CommentService
             else if (comment.UserId == user.UserId || post.UserPostId == user.UserId)
             {
                 await _commentRepository.DeleteComment(commentId);
-                return true;
+                return new ResultRespone { Status = 200 };
             }
 
-            return false;
-            
+            return new ResultRespone { Status = 400 };
+
         }
 
     }

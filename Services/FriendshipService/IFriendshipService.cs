@@ -1,4 +1,5 @@
 ﻿using DoAn4.DTOs;
+using DoAn4.DTOs.AuthenticationDTOs;
 using DoAn4.DTOs.UserDTO;
 
 
@@ -12,13 +13,13 @@ namespace DoAn4.Services.FriendshipService
 
         
 
-        Task<bool> DeleteFriendship(string token,Guid friendUserId);
+        Task<ResultRespone> DeleteFriendship(string token,Guid friendUserId);
 
-        Task<bool> SendFriendRequest(string token , Guid frienduserid);
+        Task<ResultRespone> SendFriendRequest(string token , Guid frienduserid);
 
-        Task<bool> AcceptFriendRequest(string token, Guid frienduserid);
+        Task<ResultRespone> AcceptFriendRequest(string token, Guid friendShipId);
 
-        Task<bool> RejectFriendRequest(string token, Guid frienduserid);
+        Task<ResultRespone> RejectFriendRequest(Guid friendShipId);
 
     }
 }

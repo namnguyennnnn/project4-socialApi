@@ -25,12 +25,12 @@ namespace DoAn4.Controllers
             {
                 var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
                 var result = await _friendshipService.SendFriendRequest(token, friendUserId);
-                if (!result)
+                if (result == null)
                 {
                     return BadRequest("Hai người đã là bạn hoặc yêu cầu kết bạn đã tồn tại");
                 }
 
-                return Ok("Gửi lời mời kết bạn thành công");
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -40,19 +40,19 @@ namespace DoAn4.Controllers
             }
         }
 
-        [HttpPut("accept-friendships/{senderId}"), Authorize]
-        public async Task<IActionResult> AcceptFriendshipRequest( Guid senderId)
+        [HttpPut("accept-friendships"), Authorize]
+        public async Task<IActionResult> AcceptFriendshipRequest( Guid friendShipId)
         {
             try
             {
                 var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                var result = await _friendshipService.AcceptFriendRequest(token, senderId);
-                if (!result)
+                var result = await _friendshipService.AcceptFriendRequest(token, friendShipId);
+                if (result == null)
                 {
                     return BadRequest();
                 }
 
-                return Ok("Đã chấp nhận lời mời kết bạn");
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -62,19 +62,18 @@ namespace DoAn4.Controllers
             }
         }
 
-        [HttpDelete("reject-friendships/{senderId}"),Authorize]
-        public async Task<IActionResult> RejectFriendshipRequest(Guid senderId)
+        [HttpDelete("reject-friendships"),Authorize]
+        public async Task<IActionResult> RejectFriendshipRequest([FromBody]Guid friendShipId)
         {
             try
-            {
-                var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                var result = await _friendshipService.RejectFriendRequest(token, senderId);
-                if (!result)
+            {               
+                var result = await _friendshipService.RejectFriendRequest(friendShipId);
+                if (result == null)
                 {
                     return BadRequest();
                 }
 
-                return Ok("Đã từ chối lời mời kết bạn");
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -131,12 +130,12 @@ namespace DoAn4.Controllers
             {
                 var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
                 var result = await _friendshipService.DeleteFriendship(token, friendsUserId);
-                if (!result)
+                if (result == null)
                 {
                     return BadRequest();
                 }
 
-                return Ok(" Hủy kết bạn thành công");
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -153,12 +152,12 @@ namespace DoAn4.Controllers
             {
                 var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
                 var result = await _friendshipService.DeleteFriendship(token, friendsUserId);
-                if (!result)
+                if (result == null)
                 {
                     return BadRequest();
                 }
 
-                return Ok(" Hủy kết bạn thành công");
+                return Ok(result);
             }
             catch (Exception ex)
             {

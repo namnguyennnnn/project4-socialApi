@@ -148,6 +148,7 @@ namespace DoAn4.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<int>("React")
+                        .HasMaxLength(1)
                         .HasColumnType("int");
 
                     b.Property<Guid>("UserId")
@@ -221,9 +222,12 @@ namespace DoAn4.Migrations
                     b.Property<Guid>("PostId")
                         .HasColumnType("char(36)");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
                     b.HasKey("NotifyId");
 
-                    b.HasIndex("FriendShipId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Notifies");
                 });
@@ -508,13 +512,11 @@ namespace DoAn4.Migrations
 
             modelBuilder.Entity("DoAn4.Models.Notify", b =>
                 {
-                    b.HasOne("DoAn4.Models.Friendship", "FriendShip")
-                        .WithMany("FriendShipNotify")
-                        .HasForeignKey("FriendShipId")
+                    b.HasOne("DoAn4.Models.User", null)
+                        .WithMany("Notifys")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("FriendShip");
                 });
 
             modelBuilder.Entity("DoAn4.Models.Post", b =>
@@ -555,11 +557,6 @@ namespace DoAn4.Migrations
                     b.Navigation("Messages");
                 });
 
-            modelBuilder.Entity("DoAn4.Models.Friendship", b =>
-                {
-                    b.Navigation("FriendShipNotify");
-                });
-
             modelBuilder.Entity("DoAn4.Models.Post", b =>
                 {
                     b.Navigation("Images");
@@ -569,6 +566,8 @@ namespace DoAn4.Migrations
 
             modelBuilder.Entity("DoAn4.Models.User", b =>
                 {
+                    b.Navigation("Notifys");
+
                     b.Navigation("UserReply");
 
                     b.Navigation("UserReqest");

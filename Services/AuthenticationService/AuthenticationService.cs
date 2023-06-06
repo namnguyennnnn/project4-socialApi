@@ -9,14 +9,13 @@ using System.Text;
 using DoAn4.DTOs.UserDTO;
 using System.Security.Authentication;
 using System.Globalization;
+using static System.Net.WebRequestMethods;
 
 
 namespace DoAn4.Services.AuthenticationService
 {
     public class AuthenticationService : IAuthenticationService
-    {
-        
-
+    {       
         private readonly IConfiguration _configuration;
         private readonly IUserRepository _userRepository;
         private readonly IRefreshTokenRepository _refreshTokenRepository;
@@ -207,8 +206,8 @@ namespace DoAn4.Services.AuthenticationService
                 PasswordSalt = salt,
                 PasswordHash = passwordHash,
                 Fullname = request.Fullname,
-                Avatar = Path.Combine("FileUploads", "DefaultImage", "defaultAvatar.png"),
-                CoverPhoto = Path.Combine("FileUploads", "DefaultImage", "coverPhotoDefault.jpg"),
+                Avatar = "https://res.cloudinary.com/dxrrctr3z/image/upload/v1685984428/defaultAvatar_omcl4a.png",
+                CoverPhoto = "https://res.cloudinary.com/dxrrctr3z/image/upload/v1685984430/coverPhotoDefault_jsgarx.jpg",
                 Gender = request.Gender,
                 DateOfBirth = request.DateOfBirth,
                 Address = request.Address,
@@ -251,9 +250,12 @@ namespace DoAn4.Services.AuthenticationService
 
             var claims = claimsPrincipal.Claims;
 
-            var userIdString = claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            var userName = claims.FirstOrDefault(c => c.Type == "Name")?.Value;
-
+            var userIdString = claims.FirstOrDefault(c => c.Type == "userId")?.Value;
+            var fullname = claims.FirstOrDefault(c => c.Type == "fullname")?.Value;
+            var email = claims.FirstOrDefault(c => c.Type == "email")?.Value;
+            var avatar = claims.FirstOrDefault(c => c.Type == "avatar")?.Value;
+            var coverPhoto = claims.FirstOrDefault(c => c.Type == "coverPhoto")?.Value;
+            
             var expiresAtUnixTime = long.Parse(claims.FirstOrDefault(c => c.Type == "exp")?.Value);
 
             var expiresAt = DateTimeOffset.FromUnixTimeSeconds(expiresAtUnixTime).ToLocalTime().DateTime;
@@ -274,7 +276,10 @@ namespace DoAn4.Services.AuthenticationService
                 return new ReadIdUserFromToken
                 {
                     UserId = userId,
-                    UserName = userName
+                    FullName = fullname,
+                    Email = email,
+                    Avatar = avatar,
+                    CoverPhoto = coverPhoto
                 };
             }
 
@@ -323,9 +328,11 @@ namespace DoAn4.Services.AuthenticationService
 
             // Tạo danh sách các claim cho mã JWT
             var claims = new List<Claim>{
-                new Claim("id", user.UserId.ToString()),
-                new Claim("Name", user.Fullname),
-                new Claim("Email", user.Email),              
+                new Claim("userId", user.UserId.ToString()),
+                new Claim("fullname", user.Fullname),
+                new Claim("email", user.Email),
+                new Claim("avatar",user.Avatar),
+                new Claim("coverPhoto",user.CoverPhoto)
             };
 
             // Tạo key từ secret

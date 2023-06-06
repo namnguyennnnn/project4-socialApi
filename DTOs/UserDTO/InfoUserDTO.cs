@@ -13,9 +13,9 @@ namespace DoAn4.DTOs.UserDTO
 
         public int Gender { get; set; }
 
-        public string? Avatar { get; set; }
+        public string Avatar { get; set; }
 
-        public string? CoverPhoto { get; set; }
+        public string CoverPhoto { get; set; }
 
         public DateTime? DateOfBirth { get; set; }
 

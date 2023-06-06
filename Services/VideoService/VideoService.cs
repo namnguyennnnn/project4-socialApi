@@ -48,13 +48,13 @@ namespace DoAn4.Services.VideoService
         public async Task<bool> RemoveVideo(Guid postId, UpdatePostDto updatePostDto)
         {
             var removedVideoLinks = new List<string>();
-            foreach (var removedVideoId in updatePostDto.IdVideosRemove)
+            foreach (var removedVideoLink in updatePostDto.VideosLinkRemove)
             {
-                var removedVideo = await _videoRepository.GetVideoByIdAsync(removedVideoId);
+                var removedVideo = await _videoRepository.GetVideoByLinkAsync(removedVideoLink);
                 if (removedVideo != null && removedVideo.PostId == postId)
                 {
                     removedVideoLinks.Add(removedVideo.VideoLink);
-                    await _videoRepository.RemoveVideoAsync(removedVideoId);
+                    await _videoRepository.RemoveVideoAsync(removedVideoLink);
                 }
             }
             // Remove the images from storage

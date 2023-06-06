@@ -11,6 +11,8 @@ namespace DoAn4.Interfaces
 
         Task<List<InfoUserDTO>> GetListUserAsync(List<Guid> UserIds);
 
+        Task<List<InfoUserDTO>> GetUsersByKeyWord( string keyword);
+
         Task CreateUserAsync(User user);
 
         Task UpdateUserAsync(User user);

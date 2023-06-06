@@ -18,10 +18,11 @@ using DoAn4.Services.UserService;
 using DoAn4.Services.LikeService;
 using DoAn4.Services.UserOTPService;
 using DoAn4.Services.CommentService;
-
 using DoAn4.Hubs;
 using DoAn4.Services.MessageService;
 using DoAn4.Services.ConversationService;
+using DoAn4.Helper;
+using DoAn4.Services.SearchService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -122,6 +123,8 @@ builder.Services.AddScoped<IMessageService, MessageService>();
 
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 builder.Services.AddScoped<IConversationService, ConversationService>();
+
+builder.Services.AddScoped<ISearchService, SearchService>();
 
 builder.Services.AddTransient<IFileService, FileService>();
 

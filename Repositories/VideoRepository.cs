@@ -2,6 +2,7 @@
 using DoAn4.Data;
 using DoAn4.Interfaces;
 using DoAn4.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DoAn4.Repositories
 {
@@ -22,14 +23,14 @@ namespace DoAn4.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Video> GetVideoByIdAsync(Guid videoId)
+        public async Task<Video> GetVideoByLinkAsync(string videoLink)
         {
-            var video = await _context.Videos.FindAsync(videoId);
+            var video = await _context.Videos.SingleOrDefaultAsync(video => video.VideoLink == videoLink, CancellationToken.None);
             return video;
         }
-        public async Task RemoveVideoAsync(Guid videoId)
+        public async Task RemoveVideoAsync(string videoLink)
         {
-            var video = await _context.Videos.FindAsync(videoId);
+            var video = await _context.Videos.SingleOrDefaultAsync(video => video.VideoLink == videoLink);
 
             if (video != null)
             {

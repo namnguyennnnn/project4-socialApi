@@ -4,7 +4,7 @@ namespace DoAn4.DTOs.PostDTO
 {
     public class InFoPostDto
     {
-        public Guid PostId { get; set; }
+        public Guid PostId { get; set; }        
 
         public string? Content { get; set; }
 

@@ -26,7 +26,9 @@ namespace DoAn4.Interfaces
 
         Task<bool> IsFriendshipRequestExit(Guid userId, Guid friendUserId);
 
-        Task<bool> IsFriendship(Guid userId, Guid friendUserId);
+        Task<bool> IsFriendshipExist(Guid userId, Guid friendUserId);
+
+        Task<bool> IsFriendship(Guid friendShipId);
 
         Task<int> SaveChangesAsync();
         Task<List<Guid>> GetAllFriendIdsAsync(Guid currentUserId);

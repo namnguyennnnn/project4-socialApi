@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "dC6P34MuKJcVnBFWqxcYLxuLWx4aDcO8+phtnljsjWcu3XHncHeQw8zHLMsY/hsusXYyz814XiI+mpGTfKl/2g==",
+  "dgSpecHash": "DJB8v9SdMZYhs3+f2+MR5Ysvzt8zAFWbcZuq3kgbEIgmu7knpSOEF1gNmqueZB8WkncG5ugnI31cb09RiYTN8g==",
   "success": true,
   "projectFilePath": "D:\\hoctap\\DoAn4\\DoAn4\\DoAn4.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\nam\\.nuget\\packages\\automapper\\12.0.0\\automapper.12.0.0.nupkg.sha512",
     "C:\\Users\\nam\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\12.0.0\\automapper.extensions.microsoft.dependencyinjection.12.0.0.nupkg.sha512",
+    "C:\\Users\\nam\\.nuget\\packages\\cloudinarydotnet\\1.21.0\\cloudinarydotnet.1.21.0.nupkg.sha512",
     "C:\\Users\\nam\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\nam\\.nuget\\packages\\mailjet.api\\3.0.0\\mailjet.api.3.0.0.nupkg.sha512",
     "C:\\Users\\nam\\.nuget\\packages\\microsoft.aspnetcore.authentication.abstractions\\2.2.0\\microsoft.aspnetcore.authentication.abstractions.2.2.0.nupkg.sha512",
@@ -15,6 +16,7 @@
     "C:\\Users\\nam\\.nuget\\packages\\microsoft.aspnetcore.connections.abstractions\\2.2.0\\microsoft.aspnetcore.connections.abstractions.2.2.0.nupkg.sha512",
     "C:\\Users\\nam\\.nuget\\packages\\microsoft.aspnetcore.hosting.abstractions\\2.2.0\\microsoft.aspnetcore.hosting.abstractions.2.2.0.nupkg.sha512",
     "C:\\Users\\nam\\.nuget\\packages\\microsoft.aspnetcore.hosting.server.abstractions\\2.2.0\\microsoft.aspnetcore.hosting.server.abstractions.2.2.0.nupkg.sha512",
+    "C:\\Users\\nam\\.nuget\\packages\\microsoft.aspnetcore.html.abstractions\\2.2.0\\microsoft.aspnetcore.html.abstractions.2.2.0.nupkg.sha512",
     "C:\\Users\\nam\\.nuget\\packages\\microsoft.aspnetcore.http\\2.2.0\\microsoft.aspnetcore.http.2.2.0.nupkg.sha512",
     "C:\\Users\\nam\\.nuget\\packages\\microsoft.aspnetcore.http.abstractions\\2.2.0\\microsoft.aspnetcore.http.abstractions.2.2.0.nupkg.sha512",
     "C:\\Users\\nam\\.nuget\\packages\\microsoft.aspnetcore.http.connections\\1.1.0\\microsoft.aspnetcore.http.connections.1.1.0.nupkg.sha512",

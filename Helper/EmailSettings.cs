@@ -1,4 +1,4 @@
-﻿namespace DoAn4.Data
+﻿namespace DoAn4.Helper
 {
     public class EmailSettings
     {

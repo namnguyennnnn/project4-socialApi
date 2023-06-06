@@ -13,12 +13,13 @@ namespace DoAn4.Repositories
     public class PostRepository : IPostRepository
     {
         private readonly DataContext _context;
-        private readonly IWebHostEnvironment _environment;
+        private readonly IMapper _mapper;
 
-        public PostRepository(DataContext context , IWebHostEnvironment env) 
+
+        public PostRepository(IMapper mapper, DataContext context ) 
         {
             _context = context;
-            _environment = env;
+            _mapper = mapper;
         }
 
         public async Task<List<InFoPostDto>> GetNewFeeds(List<Guid> friendIds,Guid curentUserId, int skip, int take)
@@ -46,8 +47,8 @@ namespace DoAn4.Repositories
                      Gender = p.User.Gender,
                      Avatar = p.User.Avatar
                  },
-                 Images = p.Images.Select(i => Path.Combine(_environment.ContentRootPath, i.ImageLink)).ToList(),
-                 Videos = p.Videos.Select(v => Path.Combine(_environment.ContentRootPath, v.VideoLink)).ToList()
+                 Images = p.Images.Select(i => i.ImageLink).ToList(),
+                 Videos = p.Videos.Select(v =>  v.VideoLink).ToList()
              })
              .ToListAsync();
             return posts;
@@ -59,20 +60,72 @@ namespace DoAn4.Repositories
             await _context.SaveChangesAsync();
             return post.PostId;
         }
+        
+        public async Task<Post> GetPostByIdAsync(Guid postId) {
+            var post = await _context.Posts.FindAsync(postId);
+            return post;
+        }
 
-        public async Task<Post> GetPostByIdAsync(Guid postId)
+        public async Task<InFoPostDto> GetInfoPostByIdAsync(Guid postId)
         {
-            return await _context.Posts
+            var post = await _context.Posts
                 .Include(p => p.Images)
                 .Include(p => p.Videos)
                 .FirstOrDefaultAsync(p => p.PostId == postId);
+
+            if (post == null)
+                return null;
+
+            var infoPostDto = new InFoPostDto
+            {
+                PostId = post.PostId,
+                Content = post.Content,
+                TotalReact = post.TotalReact,
+                TotalComment = post.TotalComment,
+                PostTime = post.PostTime,
+                UpdateTime = post.UpdateTime,                
+                Images = post.Images.Select(i => i.ImageLink).ToList(),
+                Videos = post.Videos.Select(v => v.VideoLink).ToList()
+            };
+
+            return infoPostDto;
         }
 
-        public async Task<List<Post>> GetAllPostByIdUserAsync(Guid userId)
+
+        public async Task<List<InFoPostDto>> GetAllPostByIdUserAsync(Guid userId)
         {
-            var listPost = await _context.Posts.Where(p => p.UserPostId == userId).ToListAsync();
-            return listPost;
+            var listPost = await _context.Posts
+                .Include(p => p.User)
+                .Where(p => p.UserPostId == userId)
+                .ToListAsync();
+
+            var result = listPost.Select(post => new InFoPostDto
+            {
+                PostId = post.PostId,
+                Content = post.Content,
+                TotalReact = post.TotalReact,
+                TotalComment = post.TotalComment,
+                PostTime = post.PostTime,
+                UpdateTime = post.UpdateTime,
+                User = new InfoUserDTO
+                {
+                    UserId = post.User.UserId,
+                    Email = post.User.Email,
+                    Fullname = post.User.Fullname,
+                    Gender = post.User.Gender,
+                    Avatar = post.User.Avatar,
+                    CoverPhoto = post.User.CoverPhoto,
+                    DateOfBirth = post.User.DateOfBirth,
+                    Address = post.User.Address,
+                    Bio = post.User.Bio,
+                    CreateAt = post.User.CreateAt
+                },
+                
+            }).ToList();
+
+            return result;
         }
+
 
         public async Task UpdatePostAsync(Post post)
         {

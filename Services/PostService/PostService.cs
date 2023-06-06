@@ -1,5 +1,7 @@
 ﻿
+using DoAn4.DTOs.AuthenticationDTOs;
 using DoAn4.DTOs.PostDTO;
+using DoAn4.DTOs.UserDTO;
 using DoAn4.Interfaces;
 using DoAn4.Models;
 using DoAn4.Services.AuthenticationService;
@@ -9,6 +11,7 @@ using DoAn4.Services.VideoService;
 using Microsoft.EntityFrameworkCore;
 
 using System.Security.Authentication;
+using static System.Net.Mime.MediaTypeNames;
 
 
 namespace DoAn4.Services.PostService
@@ -51,7 +54,7 @@ namespace DoAn4.Services.PostService
 
         }
 
-        public async Task<Post> CreatePostAsync(string token, PostDto? postDto = null)
+        public async Task<InFoPostDto> CreatePostAsync(string token, PostDto? postDto = null)
         {
             var user = await _authenticationService.GetIdUserFromAccessToken(token);
             if (user == null)
@@ -63,8 +66,9 @@ namespace DoAn4.Services.PostService
             {
                 throw new ArgumentException("Không có thông tin bài đăng được cung cấp.");
             }
+
             var localTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
-            var post = new Post
+            var newPost = new Post
             {
                 PostId = Guid.NewGuid(),
                 UserPostId = user.UserId,
@@ -76,89 +80,135 @@ namespace DoAn4.Services.PostService
                 IsDeleted = false
             };
 
-            await _postRepository.CreatePostAsync(post);
+            await _postRepository.CreatePostAsync(newPost);
 
-            if (postDto?.ImageFiles != null && postDto.ImageFiles.Any())
+            List<string>? imageLinks = null;
+            List<string>? videoLinks = null;
+            if (postDto.ImageFiles != null && postDto.ImageFiles.Any())
             {
-                await _imageService.UploadImages(post.PostId, postDto.ImageFiles);
+                var images = await _imageService.UploadImages(newPost.PostId, postDto.ImageFiles);
+                imageLinks = images.Select(img => img.ImageLink).ToList();
+            }
+            if (postDto.VideoFiles != null && postDto.VideoFiles.Any())
+            {
+                var video = await _videoService.UploadVideo(newPost.PostId, postDto.VideoFiles);
+                videoLinks = video.Select(video => video.VideoLink).ToList();
             }
 
-            if (postDto?.VideoFiles != null && postDto.VideoFiles.Any())
+            var infoUserDto = new InfoUserDTO
             {
-                await _videoService.UploadVideo(post.PostId, postDto.VideoFiles);
-            }
+                UserId = newPost.UserPostId,
+                Email = user.Email,
+                Fullname = user.FullName,
+                Avatar = user.Avatar,
+                CoverPhoto = user.CoverPhoto
+            };
 
-            return post;
+            return new InFoPostDto
+            {
+                PostId = newPost.PostId,
+                Content = newPost.Content,
+                TotalReact = newPost.TotalReact,
+                TotalComment = newPost.TotalComment,
+                PostTime = newPost.PostTime,
+                UpdateTime = newPost.UpdateTime,
+                User = infoUserDto,
+                Images = imageLinks,
+                Videos = videoLinks
+            };
         }
 
-        public async Task<bool> UpdatePostAsync(string token, Guid postId, UpdatePostDto? updatePostDto =null)
+
+        public async Task<InFoPostDto> UpdatePostAsync(string token, Guid postId, UpdatePostDto? updatePostDto = null)
         {
             var user = await _authenticationService.GetIdUserFromAccessToken(token) ?? throw new Exception("Token đã hết hạn");
-            var post = await _postRepository.GetPostByIdAsync(postId) ?? throw new ArgumentNullException(nameof(postId), "Bài đăng không tồn tại");
+            var infoPost = await _postRepository.GetInfoPostByIdAsync(postId) ?? throw new ArgumentNullException(nameof(postId), "Bài đăng không tồn tại");
+            var post = await _postRepository.GetPostByIdAsync(postId) ?? throw new ArgumentNullException();
 
             // Kiểm tra xem user hiện tại có quyền chỉnh sửa bài đăng hay không
             if (post.UserPostId != user.UserId)
             {
                 throw new Exception("Bạn không có quyền chỉnh sửa bài đăng này");
             }
-            //kiểm tra có sửa status hay không
-            if (updatePostDto.Content != null) {
-                post.Content = updatePostDto?.Content;
+
+            // Cập nhật nội dung và thời gian cập nhật
+            if (updatePostDto?.Content != null)
+            {
+                post.Content = updatePostDto.Content;
                 post.UpdateTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
             }
-            // Xóa ảnh từ post
-            if(updatePostDto?.IdImagesRemove != null && updatePostDto.IdImagesRemove.Any())
+
+            // Xử lý ảnh và video
+            if (updatePostDto != null)
             {
-                var isImageRemove = await _imageService.RemoveImage(postId, updatePostDto);
-                if (isImageRemove == false)
+                // Xóa ảnh từ post
+                if (updatePostDto.ImagesLinkRemove != null && updatePostDto.ImagesLinkRemove.Any())
                 {
-                    throw new Exception("Xóa ảnh thất bại");
+                    await _imageService.RemoveImage(postId, updatePostDto);
+                }
+
+                // Check có ảnh nào mới được thêm vào post không
+                if (updatePostDto.ImageFiles != null && updatePostDto.ImageFiles.Any())
+                {
+                    var addImage = await _imageService.UploadImages(post.PostId, updatePostDto.ImageFiles);
+                    if (addImage == null)
+                    {
+                        throw new Exception("Thêm ảnh thất bại");
+                    }
+                }
+
+                // Xóa video từ post
+                if (updatePostDto.VideosLinkRemove != null && updatePostDto.VideosLinkRemove.Any())
+                {
+                    await _videoService.RemoveVideo(postId, updatePostDto);
+                }
+
+                // Check có video nào mới được thêm vào post không
+                if (updatePostDto.VideoFiles != null && updatePostDto.VideoFiles.Any())
+                {
+                    var addVideo = await _videoService.UploadVideo(post.PostId, updatePostDto.VideoFiles);
+                    if (addVideo == null)
+                    {
+                        throw new Exception("Thêm video thất bại");
+                    }
                 }
             }
 
-            // Check có ảnh nào mới được thêm vào post không
-            if(updatePostDto?.NewImages != null && updatePostDto.NewImages.Any())
-            {
-                var addImage = await _imageService.UploadImages(post.PostId, updatePostDto.NewImages);
-                if (addImage == null)
-                {
-                    throw new Exception("Thêm ảnh thất bại");
-                }
-               
-            }
-
-            // Xóa video từ post
-            if(updatePostDto?.IdVideosRemove != null && updatePostDto.IdVideosRemove.Any())
-            {
-                var isVideosRemove = await _videoService.RemoveVideo(postId, updatePostDto);
-                if (isVideosRemove == false)
-                {
-                    throw new Exception("Xóa video thất bại");
-                }
-            }
-
-            // Check có video nào mới được thêm vào post không
-            if(updatePostDto?.Newvideos != null && updatePostDto.Newvideos.Any())
-            {
-                var addVideo = await _videoService.UploadVideo(post.PostId, updatePostDto.Newvideos);
-                if (addVideo == null)
-                {
-                    throw new Exception("Thêm video thất bại");
-                }
-            }
             try
             {
                 await _postRepository.UpdatePostAsync(post);
+                infoPost = await _postRepository.GetInfoPostByIdAsync(postId);
+
+                var infoUserDto = new InfoUserDTO
+                {
+                    UserId = user.UserId,
+                    Email = user.Email,
+                    Fullname = user.FullName,
+                    Avatar = user.Avatar,
+                    CoverPhoto = user.CoverPhoto
+                };
+
+                return new InFoPostDto
+                {
+                    PostId = infoPost.PostId,
+                    Content = post.Content,
+                    TotalReact = infoPost.TotalReact,
+                    TotalComment = infoPost.TotalComment,
+                    PostTime = infoPost.PostTime,
+                    UpdateTime = infoPost.UpdateTime,
+                    User = infoUserDto,
+                    Images = infoPost.Images,
+                    Videos = infoPost.Videos
+                };
             }
             catch (DbUpdateException ex)
             {
                 throw new Exception("Cập nhật không thành công: " + ex.Message);
             }
-
-            return true;
         }
-       
-        public async Task<bool> DeletePostAsync(string token, Guid posdId)
+
+
+        public async Task<ResultRespone> DeletePostAsync(string token, Guid posdId)
         {
             var user = await _authenticationService.GetIdUserFromAccessToken(token);
             var isDeletePost = await _postRepository.DeletePostAsync(posdId);
@@ -169,11 +219,11 @@ namespace DoAn4.Services.PostService
             }
             else if(isDeletePost != false)
             {
-                return true;
+                return new ResultRespone { Status = 200 };
             }
             else
             {
-                return false;
+                return new ResultRespone { Status = 400 };
             }
         }
 
@@ -220,7 +270,7 @@ namespace DoAn4.Services.PostService
             
         }
 
-        public async Task<List<Post>> GetSelfPostsAsync(string token)
+        public async Task<List<InFoPostDto>> GetSelfPostsAsync(string token)
         {
             var user = await _authenticationService.GetIdUserFromAccessToken(token);
             if (user == null)

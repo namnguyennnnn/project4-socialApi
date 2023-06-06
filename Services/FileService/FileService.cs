@@ -1,90 +1,71 @@
-﻿
+﻿using CloudinaryDotNet.Actions;
+using CloudinaryDotNet;
+using DoAn4.Services.FileService;
 
-namespace DoAn4.Services.FileService
+public class FileService : IFileService
 {
-    public class FileService : IFileService
+    private readonly Cloudinary _cloudinary;
+
+    public FileService(IConfiguration configuration)
     {
-        private readonly IWebHostEnvironment _environment;
-        public FileService(IWebHostEnvironment env)
+        string cloudName = configuration["CloudinarySettings:CloudName"];
+        string apiKey = configuration["CloudinarySettings:ApiKey"];
+        string apiSecret = configuration["CloudinarySettings:ApiSecret"];
+
+        Account account = new Account(cloudName, apiKey, apiSecret);
+        _cloudinary = new Cloudinary(account);
+    }
+
+    public async Task<string> SaveFile(IFormFile file)
+    {
+        string uniqueFileName = $"{Guid.NewGuid()}_{file.FileName}";
+
+        using (var memoryStream = new MemoryStream())
         {
-            _environment = env;
+            await file.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            var uploadParams = new ImageUploadParams()
+            {
+                File = new FileDescription(uniqueFileName, memoryStream),
+                PublicId = "post_images/" + uniqueFileName // Đường dẫn lưu trữ trong Cloudinary
+            };
+
+            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+
+            return uploadResult.SecureUri.ToString();
         }
+    }
 
-        public async Task<string> SaveFile(IFormFile File)
+    public async Task<bool> DeleteFiles(List<string> fileUrls)
+    {
+        foreach (var url in fileUrls)
         {
-            try
+            string publicId = GetPublicIdFromUrl(url);
+            var deletionResult = await _cloudinary.DeleteResourcesByPrefixAsync(publicId);
+
+            if (deletionResult.Deleted.Count == 0)
             {
-                var contentPath = _environment.ContentRootPath;
-                var path = Path.Combine(contentPath, "FileUploads");
-
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
-
-                // Check the allowed extensions
-                var ext = Path.GetExtension(File.FileName);
-                var allowedExtensions = new string[] { ".jpg", ".png", ".jpeg", ".mp4", ".avi", ".mov" };
-
-                if (!allowedExtensions.Contains(ext))
-                {
-                    string msg = string.Format("Only {0} extensions are allowed", string.Join(",", allowedExtensions));
-                    return msg;
-                }
-
-                string uniqueString = Guid.NewGuid().ToString();
-                var newFileName = uniqueString + ext;
-                string subPath = "";
-
-                if (ext == ".mp4" || ext == ".avi" || ext == ".mov")
-                {
-                    subPath = "Videos";
-                }
-                else
-                {
-                    subPath = "Images";
-                }
-
-                path = Path.Combine(path, subPath);
-
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
-
-                var fileWithPath = Path.Combine(path, newFileName);
-                using (var stream = new FileStream(fileWithPath, FileMode.Create))
-                {
-                    await File.CopyToAsync(stream);
-                }
-
-                return Path.Combine("FileUploads", subPath, newFileName);
+                Console.WriteLine($"Xóa tài nguyên không thành công: {url}");
+                return false; 
             }
-            catch (Exception ex)
+            else
             {
-                return "Error has occurred";
+                Console.WriteLine($"Đã xóa tài nguyên: {url}");
             }
         }
 
+        return true; 
+    }
 
-        public async Task<bool> DeleteFiles(List<string> filePaths)
-        {
-            try
-            {
-                foreach (var filePath in filePaths)
-                {
-                    if (File.Exists(Path.Combine(_environment.ContentRootPath, filePath)))
-                    {
-                        File.Delete(Path.Combine(_environment.ContentRootPath, filePath));
-                    }
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                // Handle the exception here
-                return false;
-            }
-        }
+
+
+
+    private string GetPublicIdFromUrl(string url)
+    {
+        // Trích xuất public ID từ URL Cloudinary
+        Uri uri = new Uri(url);
+        string publicId = uri.Segments.Last().Split('.')[0];
+        return publicId;
     }
 }

@@ -1,10 +1,12 @@
 ﻿using DoAn4.DTOs;
+using DoAn4.DTOs.AuthenticationDTOs;
 using DoAn4.DTOs.UserDTO;
 using DoAn4.Interfaces;
 using DoAn4.Models;
 using DoAn4.Services.AuthenticationService;
 using DoAn4.Services.NotificationService;
 using Mailjet.Client.Resources;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Authentication;
 
 namespace DoAn4.Services.FriendshipService
@@ -60,7 +62,7 @@ namespace DoAn4.Services.FriendshipService
             return friendOfUser;
         }
 
-        public async Task<bool> SendFriendRequest(string token, Guid friendUserId)
+        public async Task<ResultRespone> SendFriendRequest(string token, Guid friendUserId)
         {
 
             var sender = await _authenticationService.GetIdUserFromAccessToken(token);
@@ -74,7 +76,7 @@ namespace DoAn4.Services.FriendshipService
             {
                 throw new AuthenticationException("Người dùng không tồn tại");
             }
-            else if (await _friendshipRepository.IsFriendship(sender.UserId, friendUserId))
+            else if (await _friendshipRepository.IsFriendshipExist(sender.UserId, friendUserId))
             {
                 throw new Exception("Hai người đã là bạn ");
             }
@@ -90,40 +92,55 @@ namespace DoAn4.Services.FriendshipService
                 FriendUserId = friendUserId,
                 FriendStatus = 0
             };
+            try
+            {
+                await _friendshipRepository.AddFriendshipAsync(friendship);
+            
+                await _notificationService.SendFriendRequestNotification(sender.UserId, friendUserId);
+                return new ResultRespone
+                { 
+                    Status = 200
+                };
+            }
+            catch(DbUpdateException e)
+            {
+                throw new Exception(e.Message);
+            }
+           
 
-            await _friendshipRepository.AddFriendshipAsync(friendship);
-
-            await _notificationService.SendFriendRequestNotification(sender.UserId, friendUserId);
-
-            return true;
+            
         }
 
-        public async Task<bool> AcceptFriendRequest(string token, Guid friendUserId)
+        public async Task<ResultRespone> AcceptFriendRequest(string token, Guid friendShipId)
         {
 
-            var sender = await _authenticationService.GetIdUserFromAccessToken(token);
-            var receiver = await _userRepository.GetUserByIdAsync(friendUserId);
-
-            if (sender == null)
+            var receiver = await _authenticationService.GetIdUserFromAccessToken(token);
+            var friendship = await _friendshipRepository.GetFriendshipById(friendShipId);
+            var sender = friendship.FriendUserId == receiver.UserId ? friendship.UserId : friendship.FriendUserId;
+            if (receiver == null)
             {
                 throw new AuthenticationException("Token đã hết hạn");
             }
-            else if (sender == null || receiver == null)
+            else if (receiver == null || sender == null)
             {
                 throw new Exception("Người dùng không tồn tại");
             }
-            else if (await _friendshipRepository.IsFriendship(sender.UserId, friendUserId))
+            else if (await _friendshipRepository.IsFriendship(friendShipId))
             {
                 throw new Exception("Hai người đã là bạn bè");
             }
-
-            await _friendshipRepository.AcceptFriendAsync(sender.UserId, friendUserId);
-
-            await _notificationService.AcceptFriendRequestNotification(friendUserId, sender.UserId );
-            return true;
+                     
+            await _friendshipRepository.AcceptFriendAsync(receiver.UserId, sender);
+            await _notificationService.AcceptFriendRequestNotification(receiver.UserId,friendShipId);
+            
+           
+            return new ResultRespone
+            {
+                Status = 200
+            };
         }
          
-        public async Task<bool> DeleteFriendship(string token, Guid friendUserId)
+        public async Task<ResultRespone> DeleteFriendship(string token, Guid friendUserId)
         {
             var curentUser = await _authenticationService.GetIdUserFromAccessToken(token);
             var idFriendship = await _friendshipRepository.GetFriendshipByUserIdAndFriendUserId( curentUser.UserId , friendUserId);
@@ -135,34 +152,38 @@ namespace DoAn4.Services.FriendshipService
             {
                 var idFriendship2 = await _friendshipRepository.GetFriendshipByUserIdAndFriendUserId(friendUserId, curentUser.UserId);
                 await _friendshipRepository.DeleteFriendshipAsync(idFriendship2.FriendshipId);
-                return true;
+                return new ResultRespone
+                {
+                    Status = 200
+                };
 
             }
             await _friendshipRepository.DeleteFriendshipAsync(idFriendship.FriendshipId);
-            return true;
+            return new ResultRespone
+            {
+                Status = 200
+            };
         }
 
-        public async Task<bool> RejectFriendRequest(string token, Guid senderId)
-        {
-            var receiver = await _authenticationService.GetIdUserFromAccessToken(token);
-            var sender = await _userRepository.GetUserByIdAsync(senderId);
-            var idFriendship = await _friendshipRepository.GetFriendshipByUserIdAndFriendUserId(receiver.UserId, senderId);
-            if (sender == null)
+        public async Task<ResultRespone> RejectFriendRequest( Guid friendShipId)
+        {                   
+            var Friendship = await _friendshipRepository.GetFriendshipById(friendShipId);
+            if (Friendship == null)
             {
-                throw new AuthenticationException("Token đã hết hạn");
+                throw new AuthenticationException("Hai người chả có quan hệ gì cả");
             }
-            else if (sender == null || receiver == null)
+            try 
+            { 
+                await _friendshipRepository.DeleteFriendshipAsync(friendShipId);
+                return new ResultRespone
+                {
+                    Status = 200
+                };
+            }
+            catch(DbUpdateException e) 
             {
-                throw new AuthenticationException("Người dùng không tồn tại");
-            }
-
-            else if (await _friendshipRepository.IsFriendship(receiver.UserId, senderId))
-            {
-                throw new AuthenticationException("Hai đã là bạn bè");
-            }
-            
-            await _friendshipRepository.DeleteFriendshipAsync(idFriendship.FriendshipId);  
-            return true;
+                throw new Exception(e.Message);
+            }                   
         }
 
        

@@ -21,8 +21,6 @@ namespace DoAn4.Models
 
         [ForeignKey("FriendUserId")]
         public User FriendUser { get; set; }
-
-        [InverseProperty("FriendShip")]
-        public ICollection<Notify> FriendShipNotify { get; set; }
+        
     }
 }

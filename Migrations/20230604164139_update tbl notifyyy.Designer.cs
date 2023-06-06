@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DoAn4.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230528061607_add2tblMessage")]
-    partial class add2tblMessage
+    [Migration("20230604164139_update tbl notifyyy")]
+    partial class updatetblnotifyyy
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -223,9 +223,14 @@ namespace DoAn4.Migrations
                     b.Property<Guid>("PostId")
                         .HasColumnType("char(36)");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
                     b.HasKey("NotifyId");
 
                     b.HasIndex("FriendShipId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Notifies");
                 });
@@ -484,7 +489,7 @@ namespace DoAn4.Migrations
             modelBuilder.Entity("DoAn4.Models.Message", b =>
                 {
                     b.HasOne("DoAn4.Models.Conversations", "Conversations")
-                        .WithMany()
+                        .WithMany("Messages")
                         .HasForeignKey("ConversationsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -513,6 +518,12 @@ namespace DoAn4.Migrations
                     b.HasOne("DoAn4.Models.Friendship", "FriendShip")
                         .WithMany("FriendShipNotify")
                         .HasForeignKey("FriendShipId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DoAn4.Models.User", null)
+                        .WithMany("Notifys")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -552,6 +563,11 @@ namespace DoAn4.Migrations
                     b.Navigation("Post");
                 });
 
+            modelBuilder.Entity("DoAn4.Models.Conversations", b =>
+                {
+                    b.Navigation("Messages");
+                });
+
             modelBuilder.Entity("DoAn4.Models.Friendship", b =>
                 {
                     b.Navigation("FriendShipNotify");
@@ -566,6 +582,8 @@ namespace DoAn4.Migrations
 
             modelBuilder.Entity("DoAn4.Models.User", b =>
                 {
+                    b.Navigation("Notifys");
+
                     b.Navigation("UserReply");
 
                     b.Navigation("UserReqest");

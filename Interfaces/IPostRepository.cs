@@ -10,10 +10,11 @@ namespace DoAn4.Interfaces
 
         Task<Guid> CreatePostAsync(Post post);
 
-        Task<List<Post>> GetAllPostByIdUserAsync(Guid userId);
+        Task<List<InFoPostDto>> GetAllPostByIdUserAsync(Guid userId);
 
         Task<Post> GetPostByIdAsync(Guid postId);
-
+        
+        Task<InFoPostDto> GetInfoPostByIdAsync(Guid postId);
         Task UpdatePostAsync(Post post);
 
         Task<bool> DeletePostAsync(Guid PostId);

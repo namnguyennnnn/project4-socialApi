@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DoAn4.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230527155706_updateTblComment1")]
-    partial class updateTblComment1
+    [Migration("20230606055022_ update tbbl like")]
+    partial class updatetbbllike
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -75,6 +75,27 @@ namespace DoAn4.Migrations
                     b.ToTable("Comments");
                 });
 
+            modelBuilder.Entity("DoAn4.Models.Conversations", b =>
+                {
+                    b.Property<Guid>("ConversationsId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("UserId1")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("UserId2")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("ConversationsId");
+
+                    b.HasIndex("UserId1");
+
+                    b.HasIndex("UserId2");
+
+                    b.ToTable("Conversations");
+                });
+
             modelBuilder.Entity("DoAn4.Models.Friendship", b =>
                 {
                     b.Property<Guid>("FriendshipId")
@@ -129,6 +150,7 @@ namespace DoAn4.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<int>("React")
+                        .HasMaxLength(1)
                         .HasColumnType("int");
 
                     b.Property<Guid>("UserId")
@@ -141,6 +163,39 @@ namespace DoAn4.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Likes");
+                });
+
+            modelBuilder.Entity("DoAn4.Models.Message", b =>
+                {
+                    b.Property<Guid>("MessageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("ConversationsId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("RecipientId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("MessageId");
+
+                    b.HasIndex("ConversationsId");
+
+                    b.HasIndex("RecipientId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("DoAn4.Models.Notify", b =>
@@ -169,9 +224,12 @@ namespace DoAn4.Migrations
                     b.Property<Guid>("PostId")
                         .HasColumnType("char(36)");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
                     b.HasKey("NotifyId");
 
-                    b.HasIndex("FriendShipId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Notifies");
                 });
@@ -359,6 +417,25 @@ namespace DoAn4.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("DoAn4.Models.Conversations", b =>
+                {
+                    b.HasOne("DoAn4.Models.User", "User1")
+                        .WithMany()
+                        .HasForeignKey("UserId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DoAn4.Models.User", "User2")
+                        .WithMany()
+                        .HasForeignKey("UserId2")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User1");
+
+                    b.Navigation("User2");
+                });
+
             modelBuilder.Entity("DoAn4.Models.Friendship", b =>
                 {
                     b.HasOne("DoAn4.Models.User", "FriendUser")
@@ -408,15 +485,40 @@ namespace DoAn4.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("DoAn4.Models.Notify", b =>
+            modelBuilder.Entity("DoAn4.Models.Message", b =>
                 {
-                    b.HasOne("DoAn4.Models.Friendship", "FriendShip")
-                        .WithMany("FriendShipNotify")
-                        .HasForeignKey("FriendShipId")
+                    b.HasOne("DoAn4.Models.Conversations", "Conversations")
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("FriendShip");
+                    b.HasOne("DoAn4.Models.User", "UserRep")
+                        .WithMany()
+                        .HasForeignKey("RecipientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DoAn4.Models.User", "UserSend")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Conversations");
+
+                    b.Navigation("UserRep");
+
+                    b.Navigation("UserSend");
+                });
+
+            modelBuilder.Entity("DoAn4.Models.Notify", b =>
+                {
+                    b.HasOne("DoAn4.Models.User", null)
+                        .WithMany("Notifys")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("DoAn4.Models.Post", b =>
@@ -452,9 +554,9 @@ namespace DoAn4.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("DoAn4.Models.Friendship", b =>
+            modelBuilder.Entity("DoAn4.Models.Conversations", b =>
                 {
-                    b.Navigation("FriendShipNotify");
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("DoAn4.Models.Post", b =>
@@ -466,6 +568,8 @@ namespace DoAn4.Migrations
 
             modelBuilder.Entity("DoAn4.Models.User", b =>
                 {
+                    b.Navigation("Notifys");
+
                     b.Navigation("UserReply");
 
                     b.Navigation("UserReqest");
